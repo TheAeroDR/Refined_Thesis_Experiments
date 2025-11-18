@@ -2,9 +2,8 @@
 position = 1;
 particle = "poly";
 airflow = "air";
-magdir = "z";
 
-filename = "pos_" + num2str(position) + "_" + particle + "_" + airflow + "_mag" + magdir + ".h5";
+filename = "pos_" + num2str(position) + "_" + particle + "_" + airflow + ".h5";
 
 filename = "test_ni_output.h5";
 
@@ -25,17 +24,33 @@ ylabel('$\Delta$Voltage [V]')
 figure(2)
 tiledlayout(3,1)
 nexttile(1)
-b = spectrogram_mag(a.IFG3, Fs, 'reduced', false, true);
+b = spectrogram_mag(a.IFG3_Z, Fs, 'reduced', false, true);
 plotspectrogram(b,100)
 xticklabels([])
 xlabel([])
 nexttile(2)
-b = spectrogram_mag(a.IFG2, Fs, 'reduced', false, true);
+b = spectrogram_mag(a.IFG2_Z, Fs, 'reduced', false, true);
 plotspectrogram(b,100)
 xticklabels([])
 xlabel([])
 nexttile(3)
-b = spectrogram_mag(a.IFG1, Fs, 'reduced', false, true);
+b = spectrogram_mag(a.IFG1_Z, Fs, 'reduced', false, true);
+plotspectrogram(b,100)
+
+figure(3)
+tiledlayout(3,1)
+nexttile(1)
+b = spectrogram_mag(a.IFG3_Y, Fs, 'reduced', false, true);
+plotspectrogram(b,100)
+xticklabels([])
+xlabel([])
+nexttile(2)
+b = spectrogram_mag(a.IFG2_Y, Fs, 'reduced', false, true);
+plotspectrogram(b,100)
+xticklabels([])
+xlabel([])
+nexttile(3)
+b = spectrogram_mag(a.IFG1_Y, Fs, 'reduced', false, true);
 plotspectrogram(b,100)
 %%
 %anemometer
@@ -51,7 +66,7 @@ T_Winds = convert_to_winsdpeed(TInW,TIn_zw,T_Temp,'ms');
 V_Temp = convert_to_temperature(VertT);
 V_Winds = convert_to_winsdpeed(VertW,Vert_zw,V_Temp,'ms');
 
-figure(3)
+figure(4)
 tiledlayout(2,2)
 nexttile(1)
 plot(a.Time, T_Temp)
@@ -66,7 +81,7 @@ plot(a.Time,V_Winds)
 
 %%
 %photodiode
-figure(4)
+figure(5)
 tiledlayout(3,1)
 nexttile(1)
 plot(a.Time,a.PD3)
@@ -82,7 +97,7 @@ xlabel('Time [s]')
 [PD2y,PD2x] = photodiode_demodulate(a.PD2,Fs,[100,200,300],5);
 [PD3y,PD3x] = photodiode_demodulate(a.PD3,Fs,[100,200,300],5);
 
-figure(5)
+figure(6)
 tiledlayout(3,1)
 nexttile(1)
 plot(PD3x,PD3y)
