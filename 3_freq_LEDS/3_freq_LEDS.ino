@@ -1,49 +1,55 @@
-unsigned long previousMillis1 = 0;
-unsigned long previousMillis2 = 0;
-unsigned long previousMillis3 = 0;
+#include <avr/io.h>
+#include <avr/interrupt.h>
 
-const int bottom_LED = 10;
-const int middle_LED = 9;
-const int top_LED = 8;
+const int bottom_LED = 6;
+const int middle_LED = 11;
+const int top_LED = 9;
 
 const double bottom_F = 100.0;
 const double middle_F = 200.0;
 const double top_F = 300.0;
 
-const double bottom_time = 1000.0 / (2.0 * bottom_F);
-const double top_time = 1000.0 / (2.0 * top_F);
-const double middle_time = 1000.0 / (2.0 * middle_F);
-
 void setup()
 {
+  cli();
+
   pinMode(middle_LED, OUTPUT);
   pinMode(bottom_LED, OUTPUT); 
   pinMode(top_LED, OUTPUT);
+
+  TCCR1A = 0;
+  TCCR1B = 0;
+
+  TCCR1A = (1<<COM1A0);
+  TCCR1B = (1<<WGM12) | (1<<CS10);
+
+  OCR1A = (uint16_t)(16000000/(2*top_F)-1);
+
+  TCNT1 = 0;
+
+  TCCR2A = 0;
+  TCCR2B = 0;
+
+  TCCR2A = (1<<COM2A0) | (1<<WGM21);
+  TCCR2B = (1<<CS22) | (1<<CS21) | (1<<CS20);
+
+  OCR2A = (uint8_t)(16000000/(2*1024*middle_F)-1);
+  TCNT2 = 0;
+
+  TCCR0A = 0;
+  TCCR0B = 0;
+
+  TCCR0A = (1<<COM0A0) | (1<<WGM01);
+  TCCR0B = (1<<CS02) | (1<<CS10);
+
+  OCR0A = (uint8_t)(16000000/(2*1024*bottom_F)-1);
+
+  TCNT0 = 0;
+
+  sei();
 }
 
 void loop()
 {
-  unsigned long currentMillis = millis();
 
-  static bool middle_state = LOW;
-  static bool bottom_state = LOW;
-  static bool top_state = LOW;
-
-  if (currentMillis - previousMillis1 >= middle_time) {
-    previousMillis1 = currentMillis;
-    middle_state = !middle_state;
-    digitalWrite(middle_LED, middle_state);
-  }
-
-  if (currentMillis - previousMillis2 >= bottom_time) {
-    previousMillis2 = currentMillis;
-    bottom_state = !bottom_state;
-    digitalWrite(bottom_LED, bottom_state);
-  }
-
-  if (currentMillis - previousMillis3 >= top_time) {
-    previousMillis3 = currentMillis;
-    top_state = !top_state;
-    digitalWrite(top_LED, top_state);
-  }
 }
