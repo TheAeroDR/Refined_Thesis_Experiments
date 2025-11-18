@@ -22,8 +22,20 @@ xlabel('Time [s]')
 ylabel('$\Delta$Voltage [V]')
 %%
 %magnetic spectrogram
-b = spectrogram_mag(a.IFG1, Fs, 'reduced', false, true);
 figure(2)
+tiledlayout(3,1)
+nexttile(1)
+b = spectrogram_mag(a.IFG3, Fs, 'reduced', false, true);
+plotspectrogram(b,100)
+xticklabels([])
+xlabel([])
+nexttile(2)
+b = spectrogram_mag(a.IFG2, Fs, 'reduced', false, true);
+plotspectrogram(b,100)
+xticklabels([])
+xlabel([])
+nexttile(3)
+b = spectrogram_mag(a.IFG1, Fs, 'reduced', false, true);
 plotspectrogram(b,100)
 %%
 %anemometer
@@ -57,18 +69,29 @@ plot(a.Time,V_Winds)
 figure(4)
 tiledlayout(3,1)
 nexttile(1)
-plot(a.Time,a.PD1)
+plot(a.Time,a.PD3)
 xticklabels([])
 nexttile(2)
 plot(a.Time,a.PD2)
 nexttile(3)
-plot(a.Time,a.PD3)
+plot(a.Time,a.PD1)
 xlabel('Time [s]')
 
 %%
-[y,z] = photodiode_demodulate(a.PD3,Fs,[25,30,35],5);
+[PD1y,PD1x] = photodiode_demodulate(a.PD1,Fs,[100,200,300],5);
+[PD2y,PD2x] = photodiode_demodulate(a.PD2,Fs,[100,200,300],5);
+[PD3y,PD3x] = photodiode_demodulate(a.PD3,Fs,[100,200,300],5);
+
 figure(5)
-plot(z,y)
+tiledlayout(3,1)
+nexttile(1)
+plot(PD3x,PD3y)
+xticklabels([])
+nexttile(2)
+plot(PD2x,PD2y)
+nexttile(3)
+plot(PD1x,PD1y)
+xlabel('Time [s]')
 %%
 function out = h5totable(filename)
     time = h5read(filename ,'/time');
