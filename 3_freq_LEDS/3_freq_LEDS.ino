@@ -2,13 +2,13 @@ unsigned long previousMillis1 = 0;
 unsigned long previousMillis2 = 0;
 unsigned long previousMillis3 = 0;
 
-const int bottom_LED = 13;
-const int middle_LED = 12;
+const int bottom_LED = 10;
+const int middle_LED = 9;
 const int top_LED = 8;
 
-const double bottom_F = 1100.0;
-const double middle_F = 1700.0;
-const double top_F = 2500.0;
+const double bottom_F = 100.0;
+const double middle_F = 200.0;
+const double top_F = 300.0;
 
 const double bottom_time = 1000.0 / (2.0 * bottom_F);
 const double top_time = 1000.0 / (2.0 * top_F);
