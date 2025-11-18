@@ -6,6 +6,8 @@ magdir = "z";
 
 filename = "pos_" + num2str(position) + "_" + particle + "_" + airflow + "_mag" + magdir + ".h5";
 
+filename = "test_ni_output.h5";
+
 a = h5totable(filename);
 
 Fs = h5readatt(filename,'/','sampling_rate');
@@ -20,7 +22,7 @@ xlabel('Time [s]')
 ylabel('$\Delta$Voltage [V]')
 %%
 %magnetic spectrogram
-b = spectrogram_mag(a.IFG1, 50000, 'reduced', false, true);
+b = spectrogram_mag(a.IFG1, Fs, 'reduced', false, true);
 figure(2)
 plotspectrogram(b,100)
 %%
@@ -63,6 +65,10 @@ nexttile(3)
 plot(a.Time,a.PD3)
 xlabel('Time [s]')
 
+%%
+[y,z] = photodiode_demodulate(a.PD3,Fs,[25,30,35],5);
+figure(5)
+plot(z,y)
 %%
 function out = h5totable(filename)
     time = h5read(filename ,'/time');
@@ -119,7 +125,7 @@ function output = spectrogram_mag(data, Fs, notch_mode, apply_highpass, apply_no
     [s, f, t] = spectrogram(data, g, L, Ndft, Fs, 'onesided', 'yaxis');
     s = s ./ M;
     s(2:end-1, :) = 2 * s(2:end-1, :);
-
+    
     sc = s .* 35;
 
     output.s = sc;
@@ -145,6 +151,11 @@ end
 
 function filtered_data = highpass_filter(data, Fs, cutoff_freq)
     [b, a] = butter(4, cutoff_freq / (Fs / 2), 'high');  % 4th order Butterworth
+    filtered_data = filtfilt(b, a, data);               % zero-phase filtering
+end
+
+function filtered_data = low_pass(data, Fs, cutoff_freq)
+    [b, a] = butter(4, cutoff_freq / (Fs / 2), 'low');  % 4th order Butterworth
     filtered_data = filtfilt(b, a, data);               % zero-phase filtering
 end
 
@@ -241,4 +252,32 @@ function out = convert_to_winsdpeed(input_w, cal_f, temp,unit)
  else
      out = out;
  end
+end
+
+function [amp,t_out] = photodiode_demodulate(data,Fs,carriers,lpf)
+    N = length(data);
+    t_out = (0:N-1)' ./ Fs;
+
+    numF = numel(carriers);
+
+    data = data - mean(data);
+
+    amp = zeros(N,numF);
+
+    for i = 1:numF
+        f = carriers(i);
+        ref_sin = sin(2*pi*f*t_out);
+        ref_cos = cos(2*pi*f*t_out);
+
+        I = data .* ref_cos;
+        Q = data .* ref_sin;
+
+        %I = I - mean(I);
+        %Q = Q - mean(Q);
+
+        I_lp = low_pass(I,Fs,lpf);
+        Q_lp = low_pass(Q,Fs,lpf);
+
+        amp(:,i) = sqrt(I_lp.^2 + Q_lp.^2);
+    end
 end
