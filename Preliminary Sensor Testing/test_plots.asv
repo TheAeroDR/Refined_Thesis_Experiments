@@ -108,10 +108,10 @@ plot(data.time_s, winds)
 
 %%
 data = readtable("psd_from_image.csv");
-histogram(data.size_um,200,'Normalization','pdf')
+histogram(data.size_um,4000,'Normalization','pdf')
 xlabel("Particle Size [$\mu$m]")
 ylabel("Probability Density [-]")
-set(gca,"XScale","log")
+%set(gca,"XScale","log")
 pd = fitdist(data{:,1}, 'Lognormal');
 
 x_values = linspace(0, 5000, 1000);
