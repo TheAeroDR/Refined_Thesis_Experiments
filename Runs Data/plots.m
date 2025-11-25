@@ -1,66 +1,139 @@
 %filename constructor
 position = 1;
-particle = "poly";
-airflow = "air";
+particle = "empty";
+airflow = "noair";
 
 filename = "pos_" + num2str(position) + "_" + particle + "_" + airflow + ".h5";
 
-filename = "test_ni_output.h5";
-
-a = h5totable(filename);
+data = h5totable(filename);
 
 Fs = h5readatt(filename,'/','sampling_rate');
 
 %%
 %electrometer
-test_b = movmean(a.BE1,Fs/10);
-test_t = movmean(a.BE4,Fs/10);
-figure(1)
-plot(a.Time,test_t - test_b)
+R_fb = 1.01e9;
+eps_0 = 8.8541878188e-12;
+r_e = 6e-3;
+
+
+BE1 = movmean(data.BE1,floor(Fs/10));
+BE2 = movmean(data.BE2,floor(Fs/10));
+BE3 = movmean(data.BE3,floor(Fs/10));
+BE4 = movmean(data.BE4,floor(Fs/10));
+
+BE1_ER = - BE1 / (4 * pi * r_e^2 * R_fb * eps_0);
+BE2_ER = - BE2 / (4 * pi * r_e^2 * R_fb * eps_0);
+BE3_ER = - BE3 / (4 * pi * r_e^2 * R_fb * eps_0);
+BE4_ER = - BE4 / (4 * pi * r_e^2 * R_fb * eps_0);
+
+figure
+tiledlayout(4,1)
+nexttile
+yyaxis left
+plot(data.Time,data.BE4,'Color',[0.30,0.75,0.93])
+hold on
+plot(data.Time,BE4,'-')
+yyaxis right
+plot(data.Time,BE4_ER)
+%legend('BE4 Voltage','0.1 s Moving Average','$\frac{dE}{dt}$','Location','east')
+xticklabels('')
+
+nexttile
+yyaxis left
+plot(data.Time,data.BE3,'Color',[0.30,0.75,0.93])
+hold on
+plot(data.Time,BE3,'-')
+yyaxis right
+plot(data.Time,BE3_ER)
+xticklabels('')
+
+nexttile
+yyaxis left
+plot(data.Time,data.BE2,'Color',[0.30,0.75,0.93])
+hold on
+plot(data.Time,BE2,'-')
+yyaxis right
+plot(data.Time,BE2_ER)
+xticklabels('')
+
+nexttile
+yyaxis left
+plot(data.Time,data.BE1,'Color',[0.30,0.75,0.93])
+hold on
+plot(data.Time,BE1,'-')
+ylabel('Voltage [V]')
+yyaxis right
+plot(data.Time,BE1_ER)
 xlabel('Time [s]')
-ylabel('$\Delta$Voltage [V]')
+ylabel('$\frac{dE}{dt}$ [V/m/s]')
+%%
+a4 = decimate(BE4_ER,Fs/10);
+a3 = decimate(BE3_ER,Fs/10);
+a2 = decimate(BE2_ER,Fs/10);
+a1 = decimate(BE1_ER,Fs/10);
+
+t = decimate(data.Time,Fs/10);
+
+E4 = 0.5 * (a4(1:end-1)+a4(2:end)) * (t(2)-t(1));
+E4 = [NaN;E4];
+E3 = 0.5 * (a3(1:end-1)+a3(2:end)) * (t(2)-t(1));
+E3 = [NaN;E3];
+E2 = 0.5 * (a2(1:end-1)+a2(2:end)) * (t(2)-t(1));
+E2 = [NaN;E2];
+E1 = 0.5 * (a1(1:end-1)+a1(2:end)) * (t(2)-t(1));
+E1 = [NaN;E1];
+figure
+tiledlayout(4,1)
+nexttile(1)
+plot(t,E4)
+nexttile(2)
+plot(t,E3)
+nexttile(3)
+plot(t,E2)
+nexttile(4)
+plot(t,E1)
 %%
 %magnetic spectrogram
 figure(2)
 tiledlayout(3,1)
 nexttile(1)
-b = spectrogram_mag(a.IFG3_Z, Fs, 'reduced', false, true);
+b = spectrogram_mag(data.IFG3_Z, Fs, 'reduced', false, true);
 plotspectrogram(b,100)
 xticklabels([])
 xlabel([])
 nexttile(2)
-b = spectrogram_mag(a.IFG2_Z, Fs, 'reduced', false, true);
+b = spectrogram_mag(data.IFG2_Z, Fs, 'reduced', false, true);
 plotspectrogram(b,100)
 xticklabels([])
 xlabel([])
 nexttile(3)
-b = spectrogram_mag(a.IFG1_Z, Fs, 'reduced', false, true);
+b = spectrogram_mag(data.IFG1_Z, Fs, 'reduced', false, true);
 plotspectrogram(b,100)
 
 figure(3)
 tiledlayout(3,1)
 nexttile(1)
-b = spectrogram_mag(a.IFG3_Y, Fs, 'reduced', false, true);
+b = spectrogram_mag(data.IFG3_Y, Fs, 'reduced', false, true);
 plotspectrogram(b,100)
 xticklabels([])
 xlabel([])
 nexttile(2)
-b = spectrogram_mag(a.IFG2_Y, Fs, 'reduced', false, true);
+b = spectrogram_mag(data.IFG2_Y, Fs, 'reduced', false, true);
 plotspectrogram(b,100)
 xticklabels([])
 xlabel([])
 nexttile(3)
-b = spectrogram_mag(a.IFG1_Y, Fs, 'reduced', false, true);
+b = spectrogram_mag(data.IFG1_Y, Fs, 'reduced', false, true);
 plotspectrogram(b,100)
 %%
 %anemometer
 TIn_zw = 1.2185;
 Vert_zw = 1.1848;
 
-TInW = movmean(a.ANTI_wind_speed,floor(Fs/2));
-TInT = movmean(a.ANTI_temperature,floor(Fs/2));
-VertW = movmean(a.ANV_wind_speed,floor(Fs/2));
-VertT = movmean(a.ANV_temperature,floor(Fs/2));
+TInW = movmean(data.ANTI_wind_speed,floor(Fs/2));
+TInT = movmean(data.ANTI_temperature,floor(Fs/2));
+VertW = movmean(data.ANV_wind_speed,floor(Fs/2));
+VertT = movmean(data.ANV_temperature,floor(Fs/2));
 T_Temp = convert_to_temperature(TInT);
 T_Winds = convert_to_winsdpeed(TInW,TIn_zw,T_Temp,'ms');
 V_Temp = convert_to_temperature(VertT);
@@ -69,33 +142,33 @@ V_Winds = convert_to_winsdpeed(VertW,Vert_zw,V_Temp,'ms');
 figure(4)
 tiledlayout(2,2)
 nexttile(1)
-plot(a.Time, T_Temp)
+plot(data.Time, T_Temp)
 xticklabels([])
 nexttile(2)
-plot(a.Time, V_Temp)
+plot(data.Time, V_Temp)
 xticklabels([])
 nexttile(3)
-plot(a.Time, T_Winds)
+plot(data.Time, T_Winds)
 nexttile(4)
-plot(a.Time,V_Winds)
+plot(data.Time,V_Winds)
 
 %%
 %photodiode
 figure(5)
 tiledlayout(3,1)
 nexttile(1)
-plot(a.Time,a.PD3)
+plot(data.Time,data.PD3)
 xticklabels([])
 nexttile(2)
-plot(a.Time,a.PD2)
+plot(data.Time,data.PD2)
 nexttile(3)
-plot(a.Time,a.PD1)
+plot(data.Time,data.PD1)
 xlabel('Time [s]')
 
 %%
-[PD1y,PD1x] = photodiode_demodulate(a.PD1,Fs,[100,200,300],5);
-[PD2y,PD2x] = photodiode_demodulate(a.PD2,Fs,[100,200,300],5);
-[PD3y,PD3x] = photodiode_demodulate(a.PD3,Fs,[100,200,300],5);
+[PD1y,PD1x] = photodiode_demodulate(data.PD1,Fs,[100,200,300],5);
+[PD2y,PD2x] = photodiode_demodulate(data.PD2,Fs,[100,200,300],5);
+[PD3y,PD3x] = photodiode_demodulate(data.PD3,Fs,[100,200,300],5);
 
 figure(6)
 tiledlayout(3,1)
@@ -163,7 +236,7 @@ function output = spectrogram_mag(data, Fs, notch_mode, apply_highpass, apply_no
     [s, f, t] = spectrogram(data, g, L, Ndft, Fs, 'onesided', 'yaxis');
     s = s ./ M;
     s(2:end-1, :) = 2 * s(2:end-1, :);
-    
+    0
     sc = s .* 35;
 
     output.s = sc;
