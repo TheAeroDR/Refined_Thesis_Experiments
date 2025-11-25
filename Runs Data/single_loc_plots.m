@@ -30,7 +30,7 @@ figure
 tiledlayout(4,1)
 nexttile
 yyaxis left
-plot(data.Time,data.BE4,'Color',[0.30,0.75,0.93])
+%plot(data.Time,data.BE4,'Color',[0.30,0.75,0.93])
 hold on
 plot(data.Time,BE4,'-')
 yyaxis right
@@ -40,7 +40,7 @@ xticklabels('')
 
 nexttile
 yyaxis left
-plot(data.Time,data.BE3,'Color',[0.30,0.75,0.93])
+%plot(data.Time,data.BE3,'Color',[0.30,0.75,0.93])
 hold on
 plot(data.Time,BE3,'-')
 yyaxis right
@@ -49,7 +49,7 @@ xticklabels('')
 
 nexttile
 yyaxis left
-plot(data.Time,data.BE2,'Color',[0.30,0.75,0.93])
+%plot(data.Time,data.BE2,'Color',[0.30,0.75,0.93])
 hold on
 plot(data.Time,BE2,'-')
 yyaxis right
@@ -58,7 +58,7 @@ xticklabels('')
 
 nexttile
 yyaxis left
-plot(data.Time,data.BE1,'Color',[0.30,0.75,0.93])
+%plot(data.Time,data.BE1,'Color',[0.30,0.75,0.93])
 hold on
 plot(data.Time,BE1,'-')
 ylabel('Voltage [V]')
@@ -97,33 +97,33 @@ plot(t,E1)
 figure(2)
 tiledlayout(3,1)
 nexttile(1)
-b = spectrogram_mag(data.IFG3_Z, Fs, 'reduced', false, true);
+b = spectrogram_mag(data.IFG3_Z, Fs, 'reduced', true, true);
 plotspectrogram(b,100)
 xticklabels([])
 xlabel([])
 nexttile(2)
-b = spectrogram_mag(data.IFG2_Z, Fs, 'reduced', false, true);
+b = spectrogram_mag(data.IFG2_Z, Fs, 'reduced', true, true);
 plotspectrogram(b,100)
 xticklabels([])
 xlabel([])
 nexttile(3)
-b = spectrogram_mag(data.IFG1_Z, Fs, 'reduced', false, true);
+b = spectrogram_mag(data.IFG1_Z, Fs, 'reduced', true, true);
 plotspectrogram(b,100)
 
 figure(3)
 tiledlayout(3,1)
 nexttile(1)
-b = spectrogram_mag(data.IFG3_Y, Fs, 'reduced', false, true);
+b = spectrogram_mag(data.IFG3_Y, Fs, 'reduced', true, true);
 plotspectrogram(b,100)
 xticklabels([])
 xlabel([])
 nexttile(2)
-b = spectrogram_mag(data.IFG2_Y, Fs, 'reduced', false, true);
+b = spectrogram_mag(data.IFG2_Y, Fs, 'reduced', true, true);
 plotspectrogram(b,100)
 xticklabels([])
 xlabel([])
 nexttile(3)
-b = spectrogram_mag(data.IFG1_Y, Fs, 'reduced', false, true);
+b = spectrogram_mag(data.IFG1_Y, Fs, 'reduced', true, true);
 plotspectrogram(b,100)
 %%
 %anemometer
@@ -154,18 +154,18 @@ plot(data.Time,V_Winds)
 
 %%
 %photodiode
-figure(5)
-tiledlayout(3,1)
-nexttile(1)
-plot(data.Time,data.PD3)
-xticklabels([])
-nexttile(2)
-plot(data.Time,data.PD2)
-nexttile(3)
-plot(data.Time,data.PD1)
-xlabel('Time [s]')
-
-%%
+% figure(5)
+% tiledlayout(3,1)
+% nexttile(1)
+% plot(data.Time,data.PD3)
+% xticklabels([])
+% nexttile(2)
+% plot(data.Time,data.PD2)
+% nexttile(3)
+% plot(data.Time,data.PD1)
+% xlabel('Time [s]')
+%
+% %%
 [PD1y,PD1x] = photodiode_demodulate(data.PD1,Fs,[100,200,300],5);
 [PD2y,PD2x] = photodiode_demodulate(data.PD2,Fs,[100,200,300],5);
 [PD3y,PD3x] = photodiode_demodulate(data.PD3,Fs,[100,200,300],5);
