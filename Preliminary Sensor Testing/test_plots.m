@@ -124,18 +124,18 @@ plot(t,E2)
 nexttile(4)
 plot(t,E1)
 %% windspeed
-data = readtable("anemometer_zeros.csv",'NumHeaderLines',1);
+%data = readtable("anemometer_zeros.csv",'NumHeaderLines',1);
 
-TIN_zw = mean(data.TInW);
-Vert_zw =  mean(data.VertW);
+%TIN_zw = mean(data.TInW);
+%Vert_zw =  mean(data.VertW);
 
-data = readtable("anemometer_zeros2.csv",'NumHeaderLines',1);
+%data = readtable("anemometer_zeros2.csv",'NumHeaderLines',1);
 
-TIN_zw(2) = mean(data.TInW);
-Vert_zw(2) =  mean(data.VertW);
+%TIN_zw(2) = mean(data.TInW);
+%Vert_zw(2) =  mean(data.VertW);
 
-TIN_zw = mean(TIN_zw);
-Vert_zw = mean(Vert_zw);
+TIN_zw = 1.1848;
+Vert_zw = 1.2185;
 
 data = readtable("anemometer_test.csv",'NumHeaderLines',1);
 firstRow = readcell('anemometer_test.csv', 'Range', '1:1');
@@ -146,18 +146,37 @@ TInT = movmean(data.TInT,floor(Fs/2));
 VertW = movmean(data.VertW,floor(Fs/2));
 VertT = movmean(data.VertT,floor(Fs/2));
 
+TInW = decimate(TInW,floor(Fs/2));
+TInT = decimate(TInT,floor(Fs/2));
+VertW = decimate(VertW,floor(Fs/2));
+VertT = decimate(VertT,floor(Fs/2));
+time = decimate(data.time_s,floor(Fs/2));
+
 temp = convert_to_temperature(TInT);
 winds = convert_to_winsdpeed(TInW,TIN_zw,temp,'kph');
+
 figure(1)
-plot(data.time_s, winds)
+tiledlayout(2,1)
+nexttile(1)
+yyaxis left
+plot(time,winds)
 hold on
+yyaxis right
+plot(time,temp)
 
 temp = convert_to_temperature(VertT);
 winds = convert_to_winsdpeed(VertW,Vert_zw,temp,'kph');
-figure(2)
-plot(data.time_s, winds)
-hold on
 
+nexttile(2)
+yyaxis left
+plot(time,winds)
+ylabel('Windspeed [kph]')
+hold on
+yyaxis right
+plot(time,temp)
+ylabel('Temperature [deg C]')
+xlabel('Time [s]')
+%%
 data = readtable("anemometer_test2.csv",'NumHeaderLines',1);
 firstRow = readcell('anemometer_test2.csv', 'Range', '1:1');
 Fs = sscanf(firstRow{1,1}, 'Sample rate: %f S/s');
@@ -167,15 +186,36 @@ TInT = movmean(data.TInT,floor(Fs/2));
 VertW = movmean(data.VertW,floor(Fs/2));
 VertT = movmean(data.VertT,floor(Fs/2));
 
+TInW = decimate(TInW,floor(Fs/2));
+TInT = decimate(TInT,floor(Fs/2));
+VertW = decimate(VertW,floor(Fs/2));
+VertT = decimate(VertT,floor(Fs/2));
+time = decimate(data.time_s,floor(Fs/2));
+
 temp = convert_to_temperature(TInT);
 winds = convert_to_winsdpeed(TInW,TIN_zw,temp,'kph');
-figure(1)
-plot(data.time_s, winds)
+
+figure(2)
+tiledlayout(2,1)
+nexttile(1)
+yyaxis left
+plot(time,winds)
+hold on
+yyaxis right
+plot(time,temp)
 
 temp = convert_to_temperature(VertT);
 winds = convert_to_winsdpeed(VertW,Vert_zw,temp,'kph');
-figure(2)
-plot(data.time_s, winds)
+
+nexttile(2)
+yyaxis left
+plot(time,winds)
+ylabel('Windspeed [kph]')
+hold on
+yyaxis right
+plot(time,temp)
+ylabel('Temperature [deg C]')
+xlabel('Time [s]')
 
 
 %%
