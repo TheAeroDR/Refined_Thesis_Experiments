@@ -200,16 +200,18 @@ def plot_electrometer(figure1=True, figure2=True, apply_lims=True, background_re
     fig2,_ = plt.subplots(4,3,num=2)
     fig2.subplots_adjust(left=0.12, right=0.88, top=0.95, bottom=0.1, hspace=0.4, wspace=0.3)
 
+    R_fb = 1.01e9
+    eps_0 = 8.8541878188e-12
+    r_e = 6e-3
+
+    mean_E = np.zeros((4,3))
     for i in range(1, 4):
         filename = f"pos_{i}_{particle}_{airflow}_2.h5"
         data = h5totable(folder + filename)
         Fs = h5py.File(folder + filename, 'r').attrs['sampling_rate']
 
 
-        R_fb = 1.01e9
-        eps_0 = 8.8541878188e-12
-        r_e = 6e-3
-
+        
 
         for s in range(1, 5):
             sensor_name = sensors[s-1]
@@ -282,6 +284,11 @@ def plot_electrometer(figure1=True, figure2=True, apply_lims=True, background_re
                     plt.figure(num=10)
                     t_mod = t
                     I_mod = -sensor_mm / R_fb
+
+                    #sensor_b = spectrogram_mag(I_mod, 10, 'reduced', False, False)
+                    #sensor_b['s'] = sensor_b['s']/35
+                    #plotspectrogram(sensor_b, 5, 0, [0,2])
+
                     mask = (t_mod >= 25) & (t_mod <= 35)
                     t_mod = t_mod[mask] 
                     I_mod = I_mod[  mask]
@@ -295,6 +302,8 @@ def plot_electrometer(figure1=True, figure2=True, apply_lims=True, background_re
                     
             sensor_E = 0.5*(sensor_ER[:-1] + sensor_ER[1:]) * (t[1] - t[0])
             sensor_E = np.insert(sensor_E, 0, np.nan)
+            
+            mean_E[4-s][i-1] = np.nanmean(sensor_E)
 
             if figure2:
                 plt.figure(fig2.number)
@@ -332,6 +341,19 @@ def plot_electrometer(figure1=True, figure2=True, apply_lims=True, background_re
                     ax.set_xticklabels([])
         del data
         gc.collect()
+
+    if heatmap:
+        plt.figure(num=11)
+        im = plt.imshow(mean_E, cmap='viridis', aspect='auto',vmin=0, vmax=7000, zorder = 3)
+        #im = plt.imshow(mean_E, cmap='viridis', aspect='auto', zorder = 3)
+        plt.colorbar(im, label='Mean Electric Field [V/m]')
+        plt.xticks(ticks=[0,1,2], labels=['Position 1', 'Position 2', 'Position 3'])
+        plt.yticks(ticks=[0,1,2,3], labels=['BE4', 'BE3', 'BE2', 'BE1'])
+        for s in range(4):
+            for i in range(3):
+                text = plt.text(i, s, np.round(mean_E[s][i]), ha="center", va="center", color="w", fontsize=16)
+        plt.xlabel('Positions')
+        plt.ylabel('Electrometer Sensors')
 
 # photodiode plot function ------------------------------------------------------
 def plot_photodiode(figure3=True, apply_lims=True):
@@ -725,34 +747,34 @@ axis_limits = {
         'air': {
             'bell': {
                 'voltage': {
-                    1:{'ylim': [-2, 2]},
-                    2:{'ylim': [-2, 2]},
-                    3:{'ylim': [-2, 2]},
-                    4:{'ylim': [-2, 2]},
+                    1:{'ylim': [-3, 3]},
+                    2:{'ylim': [-3, 3]},
+                    3:{'ylim': [-3, 3]},
+                    4:{'ylim': [-2.5, 2.5]},
                 },
                 'dedt': {
-                    1:{'ylim': [-500000, 500000]},
-                    2:{'ylim': [-500000, 500000]},
-                    3:{'ylim': [-500000, 500000]},
-                    4:{'ylim': [-500000, 500000]},
+                    1:{'ylim': [-1000000, 1000000]},
+                    2:{'ylim': [-1000000, 1000000]},
+                    3:{'ylim': [-1000000, 1000000]},
+                    4:{'ylim': [-1000000, 1000000]},
                 },
                 'E': {
-                    1:{'ylim': [-50000, 50000]},
-                    2:{'ylim': [-50000, 50000]},
-                    3:{'ylim': [-50000, 50000]},
-                    4:{'ylim': [-50000, 50000]},
+                    1:{'ylim': [-60000, 60000]},
+                    2:{'ylim': [-60000, 60000]},
+                    3:{'ylim': [-60000, 60000]},
+                    4:{'ylim': [-60000, 60000]},
                 },
             },
             'mag': {
                 'z': {
-                    1:{'clim': [0, 10]},
-                    2:{'clim': [0, 10]},
-                    3:{'clim': [0, 10]},
+                    1:{'clim': [0, 3]},
+                    2:{'clim': [0, 3]},
+                    3:{'clim': [0, 3]},
                 },
                 'y': {
-                    1:{'clim': [0, 10]},
-                    2:{'clim': [0, 10]},
-                    3:{'clim': [0, 10]},
+                    1:{'clim': [0, 5]},
+                    2:{'clim': [0, 5]},
+                    3:{'clim': [0, 5]},
                 },
             },
             'pd': {
@@ -767,9 +789,9 @@ axis_limits = {
                     3:{'ylim': [-1, 1]},
                 },
                 'temp': {
-                    1:{'ylim': [20, 30]},
-                    2:{'ylim': [20, 30]},
-                    3:{'ylim': [20, 30]},
+                    1:{'ylim': [22, 24]},
+                    2:{'ylim': [22, 24]},
+                    3:{'ylim': [22, 24]},
                 },
             },
         },
@@ -837,8 +859,8 @@ electrometer_background = {
 }
 # -----------------------------------------------------------------------------
 
-particle = "empty"
-airflow = "air"
+particle = "poly" #empty, poly, sand
+airflow = "air" #noair, air
 
 folder = "Runs Data/"
 
@@ -846,15 +868,17 @@ sensors = ['BE1','BE2','BE3','BE4','PD1','PD2','PD3','ANTI_wind_speed',
     'ANTI_temperature','ANTO_wind_speed','ANTO_temperature','ANV_wind_speed',
     'ANV_temperature','IFG1_Z','IFG2_Z','IFG3_Z','IFG1_Y','IFG2_Y','IFG3_Y']
 
-bells1 = True
-bells2 = True
+bells1 = False
+bells2 = False
 spike = False
+heatmap = True
 
-mag_z = True
-mag_y = True
+mag_z = False
+mag_y = False
+flim = 50
 
-pds = True
-anems = True
+pds = False
+anems = False
 
 
 apply_lims = True
@@ -867,7 +891,7 @@ save_string = f"{particle}_{airflow}"
 
 labels = ['(a)', '(b)', '(c)', '(d)', '(e)', '(f)', '(g)', '(h)', '(i)', '(j)', '(k)', '(l)', '(m)', '(n)', '(o)', '(p)', '(q)', '(r)']
 
-if bells1 or bells2:
+if bells1 or bells2 or spike or heatmap:
     plot_electrometer(bells1, bells2, apply_lims, background_red)
     if bells1:
         plt.figure(1)
@@ -887,6 +911,12 @@ if bells1 or bells2:
         plt.savefig(folder + save_string + "_spike.png")
         plt.clf()
 
+    if heatmap:
+        plt.figure(11)
+        plt.savefig(folder + save_string + "_heatmap.eps")
+        plt.savefig(folder + save_string + "_heatmap.png")
+        plt.clf()
+
 if pds:
     plot_photodiode(pds, apply_lims)
     if pds:
@@ -904,7 +934,7 @@ if anems:
         plt.clf()
 
 if mag_z or mag_y:
-    plot_magnetometer(mag_z, mag_y, apply_lims, 50, apply_highpass, apply_notch, fft_flag)
+    plot_magnetometer(mag_z, mag_y, apply_lims, flim, apply_highpass, apply_notch, fft_flag)
     if mag_z:
         plt.figure(5)
         plt.savefig(folder + save_string + "_mag_z.eps")
