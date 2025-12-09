@@ -160,8 +160,8 @@ def convert_to_temperature(x):
 
 def convert_to_winsdpeed(input_w, cal_f, temp, unit):
     out = ((input_w - cal_f) / (3.038517 * (temp ** 0.115157))) / 0.087288
-    out = out ** 3.009364
     out[out < 0] = 0
+    out = out ** 3.009364
     if unit == 'ms':
         out *= 0.44704
     elif unit == 'kph':
@@ -206,7 +206,7 @@ def plot_electrometer(figure1=True, figure2=True, apply_lims=True, background_re
 
     mean_E = np.zeros((4,3))
     for i in range(1, 4):
-        filename = f"pos_{i}_{particle}_{airflow}_2.h5"
+        filename = f"pos_{i}_{particle}_{airflow}{version}.h5"
         data = h5totable(folder + filename)
         Fs = h5py.File(folder + filename, 'r').attrs['sampling_rate']
 
@@ -339,13 +339,40 @@ def plot_electrometer(figure1=True, figure2=True, apply_lims=True, background_re
 
                 if s !=1:
                     ax.set_xticklabels([])
+
+            # fig40,_ = plt.subplots(2,1,num=40)
+            # fig40.subplots_adjust(left=0.12, right=0.88, top=0.95, bottom=0.1, hspace=0.4, wspace=0.3)
+            # ax_left = plt.subplot(2, 1, 1)
+            # ax_left.plot(t, sensor_mm,color='#0072BD')
+            # ax_right = ax_left.twinx()
+            # ax_right.plot(t, sensor_ER,color='#D85319')
+            # ax_left.text(-0.1, 1.05, r'$\textbf{(a)}$', transform=ax_left.transAxes, fontsize=22,  verticalalignment='bottom', horizontalalignment='right')
+            # ax_left.tick_params(axis='y', colors='#0072BD')
+            # ax_left.spines['left'].set_color('#0072BD')
+            # ax_right.tick_params(axis='y', colors='#D85319')
+            # ax_right.spines['top'].set_visible(False)
+            # ax_right.spines['bottom'].set_visible(False)
+            # ax_right.spines['left'].set_visible(False)
+            # ax_right.spines['right'].set_color('#D85319')
+            # ax_left.set_xlim([0, 120])
+            # ax_left.set_ylabel('Voltage [V]', fontsize=30, color='#0072BD')
+            # ax_right.set_ylabel(r'$\frac{dE}{dt}$ [V/m/s]', fontsize=30, color='#D85319')
+            # ax = plt.subplot(2, 1, 2)
+            # ax.plot(t, sensor_E)
+            # ax.text(-0.1, 1.05, r'$\textbf{(b)}$', transform=ax.transAxes, fontsize=22,  verticalalignment='bottom', horizontalalignment='right')
+            # ax.set_ylabel('Electric Field [V/m]', fontsize=30)
+            # ax.set_xlim([0, 120])
+            # fig40.supxlabel('Time [s]', fontsize=30)
+            # plt.savefig('test.eps')
+            # plt.clf()
+
         del data
         gc.collect()
 
     if heatmap:
         plt.figure(num=11)
-        im = plt.imshow(mean_E, cmap='viridis', aspect='auto',vmin=0, vmax=7000, zorder = 3)
-        #im = plt.imshow(mean_E, cmap='viridis', aspect='auto', zorder = 3)
+        #im = plt.imshow(mean_E, cmap='viridis', aspect='auto',vmin=0, vmax=7000, zorder = 3)
+        im = plt.imshow(mean_E, cmap='viridis', aspect='auto', zorder = 3)
         plt.colorbar(im, label='Mean Electric Field [V/m]')
         plt.xticks(ticks=[0,1,2], labels=['Position 1', 'Position 2', 'Position 3'])
         plt.yticks(ticks=[0,1,2,3], labels=['BE4', 'BE3', 'BE2', 'BE1'])
@@ -362,7 +389,7 @@ def plot_photodiode(figure3=True, apply_lims=True):
 
 
     for i in range(1, 4):
-        filename = f"pos_{i}_{particle}_{airflow}_2.h5"
+        filename = f"pos_{i}_{particle}_{airflow}{version}.h5"
         data = h5totable(folder + filename)
         Fs = h5py.File(folder + filename, 'r').attrs['sampling_rate']
 
@@ -419,7 +446,7 @@ def plot_anemometer(figure4=True, apply_lims=True):
 
 
     for i in range(1, 4):
-        filename = f"pos_{i}_{particle}_{airflow}_2.h5"
+        filename = f"pos_{i}_{particle}_{airflow}{version}.h5"
         data = h5totable(folder + filename)
         Fs = h5py.File(folder + filename, 'r').attrs['sampling_rate']
 
@@ -509,7 +536,7 @@ def plot_magnetometer(figure5=True, figure6=True, apply_lims=True, plot_freq=100
 
 
     for i in range(1, 4):
-        filename = f"pos_{i}_{particle}_{airflow}_2.h5"
+        filename = f"pos_{i}_{particle}_{airflow}{version}.h5"
         data = h5totable(folder + filename)
         Fs = h5py.File(folder + filename, 'r').attrs['sampling_rate']
 
@@ -572,7 +599,7 @@ def plot_magnetometer(figure5=True, figure6=True, apply_lims=True, plot_freq=100
     fig6.subplots_adjust(left=0.12, right=0.88, top=0.95, bottom=0.1, hspace=0.4, wspace=0.3)
 
     for i in range(1, 4):
-        filename = f"pos_{i}_{particle}_{airflow}_2.h5"
+        filename = f"pos_{i}_{particle}_{airflow}{version}.h5"
         data = h5totable(folder + filename)
         Fs = h5py.File(folder + filename, 'r').attrs['sampling_rate']
 
@@ -800,40 +827,40 @@ axis_limits = {
         'air': {
             'bell': {
                 'voltage': {
-                    1:{'ylim': [-2, 2]},
-                    2:{'ylim': [-2, 2]},
-                    3:{'ylim': [-2, 2]},
-                    4:{'ylim': [-2, 2]},
+                    1:{'ylim': [-3, 3]},
+                    2:{'ylim': [-4, 4]},
+                    3:{'ylim': [-4, 4]},
+                    4:{'ylim': [-3, 3]},
                 },
                 'dedt': {
-                    1:{'ylim': [-500000, 500000]},
-                    2:{'ylim': [-500000, 500000]},
-                    3:{'ylim': [-500000, 500000]},
-                    4:{'ylim': [-500000, 500000]},
+                    1:{'ylim': [-1000000, 1000000]},
+                    2:{'ylim': [-1500000, 1500000]},
+                    3:{'ylim': [-1500000, 1500000]},
+                    4:{'ylim': [-1000000, 1000000]},
                 },
                 'E': {
-                    1:{'ylim': [-50000, 50000]},
-                    2:{'ylim': [-50000, 50000]},
-                    3:{'ylim': [-50000, 50000]},
-                    4:{'ylim': [-50000, 50000]},
+                    1:{'ylim': [-100000, 100000]},
+                    2:{'ylim': [-100000, 100000]},
+                    3:{'ylim': [-100000, 100000]},
+                    4:{'ylim': [-100000, 100000]},
                 },
             },
             'mag': {
                 'z': {
-                    1:{'clim': [0, 10]},
-                    2:{'clim': [0, 10]},
-                    3:{'clim': [0, 10]},
+                    1:{'clim': [0, 3]},
+                    2:{'clim': [0, 3]},
+                    3:{'clim': [0, 3]},
                 },
                 'y': {
-                    1:{'clim': [0, 10]},
-                    2:{'clim': [0, 10]},
-                    3:{'clim': [0, 10]},
+                    1:{'clim': [0, 3]},
+                    2:{'clim': [0, 3]},
+                    3:{'clim': [0, 3]},
                 },
             },
             'pd': {
-                1:{'ylim': [0, 0.08]},
-                2:{'ylim': [0, 0.08]},
-                3:{'ylim': [0, 0.08]},
+                1:{'ylim': [0, 0.05]},
+                2:{'ylim': [0, 0.05]},
+                3:{'ylim': [0, 0.05]},
             },
             'anem': {
                 'wind': {
@@ -842,9 +869,9 @@ axis_limits = {
                     3:{'ylim': [-1, 1]},
                 },
                 'temp': {
-                    1:{'ylim': [20, 30]},
-                    2:{'ylim': [20, 30]},
-                    3:{'ylim': [20, 30]},
+                    1:{'ylim': [22, 24]},
+                    2:{'ylim': [22, 24]},
+                    3:{'ylim': [22, 24]},
                 },
             },
         },
@@ -859,8 +886,9 @@ electrometer_background = {
 }
 # -----------------------------------------------------------------------------
 
-particle = "poly" #empty, poly, sand
+particle = "sand" #empty, poly, sand
 airflow = "air" #noair, air
+version = "" #"" "_2" "_3"
 
 folder = "Runs Data/"
 
@@ -882,12 +910,16 @@ anems = False
 
 
 apply_lims = True
-background_red=True
+background_red=False
 apply_highpass=False
 apply_notch=True
 fft_flag=False
 
-save_string = f"{particle}_{airflow}"
+if version:
+    saveno = version[1]
+else:
+    saveno = version
+save_string = f"{particle}_{airflow}{saveno}"
 
 labels = ['(a)', '(b)', '(c)', '(d)', '(e)', '(f)', '(g)', '(h)', '(i)', '(j)', '(k)', '(l)', '(m)', '(n)', '(o)', '(p)', '(q)', '(r)']
 

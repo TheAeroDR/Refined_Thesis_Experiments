@@ -2,5 +2,4 @@ ljm/
 .vscode/
 build/
 *.asv
-temp_results/
 
