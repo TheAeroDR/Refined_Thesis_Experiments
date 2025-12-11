@@ -10,13 +10,15 @@ matplotlib.use('Qt5Agg')
 # configuration (inputs)
 scanRate = 40000 # S/s
 scanDuration = 30  # s
-csv_path = 'anemometer_test.csv'
+csv_path = 'mag3_test.csv'
 #selected_channels = ['AIN0', 'AIN1', 'AIN2']
 #selected_channels = ['AIN0', 'AIN1', 'AIN2', 'AIN3']
-selected_channels = ['AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5']
+#selected_channels = ['AIN0', 'AIN1', 'AIN2', 'AIN3', 'AIN4', 'AIN5']
+selected_channels = ['AIN0', 'AIN1', 'AIN2']
 #channel_names = ['PD1', 'PD2', 'PD3']
 #channel_names = ['BE1', 'BE2', 'BE3', 'BE4']
-channel_names = ['TInW', 'TInT', 'TOutW', 'TOutT','VertW', 'VertT']
+#channel_names = ['TInW', 'TInT', 'TOutW', 'TOutT','VertW', 'VertT']
+channel_names = ['FGx', 'FGy', 'FGz']
 
 def labmjack_stream(scanRate, scanDuration):
     handle = ljm.openS("T8", "ANY", "480010419")  #T8 device, any connection, my serial number

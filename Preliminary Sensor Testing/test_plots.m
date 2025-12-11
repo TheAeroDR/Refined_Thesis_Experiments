@@ -234,6 +234,87 @@ plot(x_values, y_values, 'r-', 'LineWidth', 2);
 
 
 %%
+%magnetometers
+data = readtable("mag1_test.csv");
+firstRow = readcell('mag1_test.csv', 'Range', '1:1');
+Fs = sscanf(firstRow{1,1}, 'Sample rate: %f S/s');
+
+figure
+tiledlayout(3,3)
+
+nexttile(1)
+a = spectrogram_mag(data.FGx, Fs, 'reduced', 0, 1);
+plotspectrogram(a,50)
+xlabel([])
+ylabel([])
+xticklabels([])
+
+nexttile(4)
+a = spectrogram_mag(data.FGy, Fs, 'reduced', 0, 1);
+plotspectrogram(a,50)
+xlabel([])
+xticklabels([])
+
+nexttile(7)
+a = spectrogram_mag(data.FGz, Fs, 'reduced', 0, 1);
+plotspectrogram(a,50)
+xlabel([])
+ylabel([])
+
+data = readtable("mag2_test.csv");
+firstRow = readcell('mag1_test.csv', 'Range', '1:1');
+Fs = sscanf(firstRow{1,1}, 'Sample rate: %f S/s');
+
+nexttile(2)
+a = spectrogram_mag(data.FGx, Fs, 'reduced', 0, 1);
+plotspectrogram(a,50)
+xlabel([])
+ylabel([])
+xticklabels([])
+yticklabels([])
+
+nexttile(5)
+a = spectrogram_mag(data.FGy, Fs, 'reduced', 0, 1);
+plotspectrogram(a,50)
+xlabel([])
+ylabel([])
+xticklabels([])
+yticklabels([])
+
+nexttile(8)
+a = spectrogram_mag(data.FGz, Fs, 'reduced', 0, 1);
+plotspectrogram(a,50)
+ylabel([])
+yticklabels([])
+
+data = readtable("mag3_test.csv");
+firstRow = readcell('mag1_test.csv', 'Range', '1:1');
+Fs = sscanf(firstRow{1,1}, 'Sample rate: %f S/s');
+
+nexttile(3)
+a = spectrogram_mag(data.FGx, Fs, 'reduced', 0, 1);
+plotspectrogram(a,50)
+xlabel([])
+ylabel([])
+xticklabels([])
+yticklabels([])
+
+nexttile(6)
+a = spectrogram_mag(data.FGy, Fs, 'reduced', 0, 1);
+plotspectrogram(a,50)
+xlabel([])
+ylabel([])
+xticklabels([])
+yticklabels([])
+
+nexttile(9)
+a = spectrogram_mag(data.FGz, Fs, 'reduced', 0, 1);
+plotspectrogram(a,50)
+xlabel([])
+ylabel([])
+yticklabels([])
+%%
+
 function out = convert_to_temperature(input)
  out = (input - 0.400)./(0.0195);
 end
@@ -252,4 +333,155 @@ function out = convert_to_winsdpeed(input_w, cal_f, temp,unit)
  else
      out = out;
  end
+end
+
+function output = spectrogram_mag(data, Fs, notch_mode, apply_highpass, apply_notch)
+    % Defaults for optional arguments
+    if nargin < 2 || isempty(notch_mode), notch_mode = 'comb'; end
+    if nargin < 3 || isempty(apply_highpass), apply_highpass = true; end
+    if nargin < 4 || isempty(apply_notch), apply_notch = true; end
+
+    data = data * 1000;
+    data = data - mean(data);
+  
+    % High-pass filter
+    if apply_highpass
+        data = highpass_filter(data, Fs, 2);
+    end
+
+    % Notch filter
+    if apply_notch
+        switch lower(notch_mode)
+            case 'butter'
+                data = comb_notch_filter(data, Fs, 50, 5, 1);
+            case 'comb'
+                data = notch_50Hz(data, Fs);
+            case 'reduced'
+                Hd = notch_50_100(Fs, 1);
+                data = Hd(data);
+            otherwise
+                warning('Unknown notch mode. Skipping notch filtering.');
+        end
+    end
+
+
+    % Spectrogram settings
+    M = floor(Fs);
+    L = M / 2;
+    g = tukeywin(M,0.1);
+    Ndft = 2^nextpow2(M);
+    
+    fft_single(data,Fs);
+
+    [s, f, t] = spectrogram(data, g, L, Ndft, Fs, 'onesided', 'yaxis');
+    s = s ./ M;
+    s(2:end-1, :) = 2 * s(2:end-1, :);
+
+    sc = s .* 35;
+
+    output.s = sc;
+    output.f = f;
+    output.t = t;
+end
+
+function plotspectrogram(input,cutoff)
+    [x,y] = meshgrid(input.t,input.f(input.f<cutoff));
+    z = abs(input.s(input.f<cutoff,:));
+    
+    h = surf(x,y,z);
+    set(h,'linestyle','none');
+    view(0,90)
+    ylim([0,cutoff])
+    ylabel('Frequency [Hz]')
+    xlim([0,input.t(end)])
+    xlabel('Time [s]')
+    c = colorbar;
+    c.Label.String = ('Magnetic Flux Density [nT]');
+    c.Label.Interpreter = 'Latex';
+    clim([0,8000])
+end
+
+function filtered_data = highpass_filter(data, Fs, cutoff_freq)
+    [b, a] = butter(4, cutoff_freq / (Fs / 2), 'high');  % 4th order Butterworth
+    filtered_data = filtfilt(b, a, data);               % zero-phase filtering
+end
+
+function filtered_data = low_pass(data, Fs, cutoff_freq)
+    [b, a] = butter(4, cutoff_freq / (Fs / 2), 'low');  % 4th order Butterworth
+    filtered_data = filtfilt(b, a, data);               % zero-phase filtering
+end
+
+function filtered_data = comb_notch_filter(data, Fs, base_freq, num_harmonics, bandwidth)
+    filtered_data = data;
+    for k = 1:num_harmonics
+        notch_freq = k * base_freq;
+        Wn = [notch_freq - bandwidth/2, notch_freq + bandwidth/2] / (Fs/2);
+        [b, a] = butter(1, Wn, 'stop');
+        filtered_data = filtfilt(b, a, filtered_data);
+    end
+end
+
+function filtered_data = notch_50Hz(input, Fs)
+    % Design a comb notch filter for 50 Hz and harmonics - this uses a
+    % legacy function
+    L = round(Fs / 50);           % spacing between notches
+    BW = 1;                       % Bandwidth of each notch (Hz)
+    GBW = -5;                     % Gain at the bandwidth edges (dB)
+    Nsh = floor(Fs/(2*50)) - 1;   % Number of harmonics to suppress
+
+    d = fdesign.comb('notch','L,BW,GBW,Nsh', L, BW, GBW, Nsh, Fs);
+    h = design(d,'SystemObject',true);
+
+    % Apply zero-phase filtering
+    filtered_data = filtfilt(h.Numerator, h.Denominator, real(input));
+end
+
+function filtered_data = notch_50Hz_iirnotch(data, Fs)
+    filtered_data = data;
+    base_freq = 50;
+    num_harmonics = floor(Fs/(2*base_freq)); % Nyquist limited
+    Q = 35; % Quality factor - adjust to control bandwidth
+    
+    for k = 1:num_harmonics
+        f0 = k * base_freq;
+        wo = f0 / (Fs/2);  % Normalized frequency
+        bw = wo / Q;       % Bandwidth
+        [b,a] = iirnotch(wo, bw);
+        filtered_data = filtfilt(b, a, filtered_data);
+    end
+end
+
+function Hd = notch_50_100(Fs, BW)
+    % Design notch filter at 50 Hz
+    W0_50 = 50 / (Fs/2);
+    Q_50 = 50 / BW;
+    [b50, a50] = iirnotch(W0_50, W0_50/Q_50);
+
+    % Design notch filter at 100 Hz
+    W0_100 = 100 / (Fs/2);
+    Q_100 = 100 / BW;
+    [b100, a100] = iirnotch(W0_100, W0_100/Q_100);
+
+    % Combine both filters in cascade
+    Hd = dsp.FilterCascade( ...
+        dsp.IIRFilter('Numerator', b50, 'Denominator', a50), ...
+        dsp.IIRFilter('Numerator', b100, 'Denominator', a100));
+end
+
+function output = fft_single(data,Fs)
+
+    L = length(data);
+    f = Fs*(0:(L/2))/L;
+    Y = fft(data);
+    %matlab fft doesn't normalise by size
+    %make double sided spectrum
+    P2 = abs(Y/L);
+    %make single sided spectrum
+    P1 = P2(1:L/2+1);
+    P1(2:end-1) = 2 * P1(2:end-1);
+
+    output.data = data;
+    output.Y = Y;
+    output.P1 = P1;
+    output.f = f;
 end
