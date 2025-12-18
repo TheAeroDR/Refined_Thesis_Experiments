@@ -378,7 +378,7 @@ def plot_electrometer(figure1=True, figure2=True, apply_lims=True, background_re
         plt.yticks(ticks=[0,1,2,3], labels=['BE4', 'BE3', 'BE2', 'BE1'])
         for s in range(4):
             for i in range(3):
-                text = plt.text(i, s, np.round(mean_E[s][i]), ha="center", va="center", color="w", fontsize=16)
+                text = plt.text(i, s, np.round(mean_E[s][i]), ha="center", va="center", color="w", fontsize=25)
         plt.xlabel('Positions')
         plt.ylabel('Electrometer Sensors')
 
@@ -879,9 +879,9 @@ axis_limits = {
 }
 
 electrometer_background = { 
-    1: -0.0106,
-    2: 0.0069,
-    3: 0.0200,
+    1: -0.0105,
+    2: 0.0068,
+    3: 0.0198,
     4: -0.0075,
 }
 # -----------------------------------------------------------------------------
@@ -910,7 +910,7 @@ anems = False
 
 
 apply_lims = True
-background_red=False
+background_red=True
 apply_highpass=False
 apply_notch=True
 fft_flag=False
@@ -946,7 +946,7 @@ if bells1 or bells2 or spike or heatmap:
     if heatmap:
         plt.figure(11)
         plt.savefig(folder + save_string + "_heatmap.eps")
-        plt.savefig(folder + save_string + "_heatmap.png")
+        plt.savefig(folder + save_string + "_heatmap.pdf")
         plt.clf()
 
 if pds:

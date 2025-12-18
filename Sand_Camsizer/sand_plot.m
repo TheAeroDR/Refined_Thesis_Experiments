@@ -56,3 +56,39 @@ legend('Sand','Holasandur (10cm depth)','Holasandur (surface)', ...
 
 xlabel('Particle Size [$\mu$m]')
 ylabel('Cumulative Volume Fraction [-]')
+
+
+%%
+pdf_data = [];
+for i = 1:length(bin_mid)
+    pdf_data = [pdf_data, repmat(log10(bin_mid(i)), 1, floor(1000*data.p3___(i)))];
+end
+
+
+pd = fitdist(pdf_data','Normal');
+
+%meansize = 10^pd.mu;
+
+%stddevsize = 10^pd.sigma;
+
+meansize = 10.^(pd.mu + 0.5 * pd.sigma^2);
+stddevsize = sqrt((10.^(pd.sigma^2) - 1) * 10.^(2*pd.mu + pd.sigma^2));
+
+histogram('Normalization','probability',BinEdges = bins', BinCounts = data.p3___)
+hold on
+histogram((10.^pdf_data),bins','Normalization','probability')
+set(gca,'xscale','log')
+
+x = logspace(1,3,100);
+y = normpdf(log10(x),pd.mu,pd.sigma);
+
+plot(x,y./sum(y))
+
+y2 = lnpdf(x,pd.mu,pd.sigma);
+
+plot(x,y2./sum(y2))
+
+function pdf = lnpdf(x, mu, sigma)
+
+    pdf = (1 ./ (x * sigma * sqrt(2 * pi))) .* 10.^(-0.5 * ((log10(x) - mu).^2 / (2 * sigma.^2)));
+end
