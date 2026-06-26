@@ -682,14 +682,14 @@ axis_limits = {
             },
             'mag': {
                 'z': {
-                    1:{'clim': [0, 3]},
-                    2:{'clim': [0, 3]},
-                    3:{'clim': [0, 3]},
+                    1:{'clim': [0, 1]},
+                    2:{'clim': [0, 1]},
+                    3:{'clim': [0, 1]},
                 },
                 'y': {
-                    1:{'clim': [0, 5]},
-                    2:{'clim': [0, 5]},
-                    3:{'clim': [0, 5]},
+                    1:{'clim': [0, 1.5]},
+                    2:{'clim': [0, 1.5]},
+                    3:{'clim': [0, 1.5]},
                 },
             },
             'pd': {
@@ -743,9 +743,9 @@ axis_limits = {
                     3:{'ylim': [0, 100]},
                 },
                 'y': {
-                    1:{'clim': [0, 5]},
-                    2:{'clim': [0, 5]},
-                    3:{'clim': [0, 5]},
+                    1:{'clim': [0, 3]},
+                    2:{'clim': [0, 3]},
+                    3:{'clim': [0, 3]},
                 },
                 'yfft': {
                     1:{'ylim': [0, 100]},
@@ -794,14 +794,14 @@ axis_limits = {
             },
             'mag': {
                 'z': {
+                    1:{'clim': [0, 1.5]},
+                    2:{'clim': [0, 1.5]},
+                    3:{'clim': [0, 1.5]},
+                },
+                'y': {
                     1:{'clim': [0, 3]},
                     2:{'clim': [0, 3]},
                     3:{'clim': [0, 3]},
-                },
-                'y': {
-                    1:{'clim': [0, 5]},
-                    2:{'clim': [0, 5]},
-                    3:{'clim': [0, 5]},
                 },
             },
             'pd': {
@@ -847,14 +847,14 @@ axis_limits = {
             },
             'mag': {
                 'z': {
-                    1:{'clim': [0, 3]},
-                    2:{'clim': [0, 3]},
-                    3:{'clim': [0, 3]},
+                    1:{'clim': [0, 1.5]},
+                    2:{'clim': [0, 1.5]},
+                    3:{'clim': [0, 1.5]},
                 },
                 'y': {
-                    1:{'clim': [0, 3]},
-                    2:{'clim': [0, 3]},
-                    3:{'clim': [0, 3]},
+                    1:{'clim': [0, 2]},
+                    2:{'clim': [0, 2]},
+                    3:{'clim': [0, 2]},
                 },
             },
             'pd': {
@@ -899,10 +899,10 @@ sensors = ['BE1','BE2','BE3','BE4','PD1','PD2','PD3','ANTI_wind_speed',
 bells1 = False
 bells2 = False
 spike = False
-heatmap = True
+heatmap = False
 
-mag_z = False
-mag_y = False
+mag_z = True
+mag_y = True
 flim = 50
 
 pds = False
